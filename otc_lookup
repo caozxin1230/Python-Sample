@@ -1,0 +1,9 @@
+class otc_lookup:
+
+    def __init__(self,id,date):
+        self.id = id
+        self.date = date
+        self.otc_db = []
+
+    def add_otc_data(self, trick):
+        self.otc_db.append(trick)
