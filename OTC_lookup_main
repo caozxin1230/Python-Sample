@@ -1,0 +1,118 @@
+### the main functions for this app is to extract and load the data from OTC; transform, filter and compel into a json file;
+### and search on json file for given symbols and effective_date of the records.
+
+
+####Libraries
+import os
+import urllib.request
+import json
+from json import JSONEncoder
+import jsonpickle
+import time
+from datetime import date
+from datetime import datetime
+
+##### model
+from otc_data import otc_data
+from otc_lookup import otc_lookup
+
+##### file info
+json_file = 'otc_testing_data.txt'
+txt_file ='OTC_loading_1150_to_1156_testing_fun_2.txt'
+
+###read from OTC data
+
+sdate_point = 1
+sdate_index = '2014-11-01'
+edate_point = 1172
+edate_index = '2018-06-01'
+
+def read_from_OTC()
+    for i in range (sdate_point, edate_point):
+        try:
+            load_url = 'http://otce.finra.org/DailyList/DownloadFileStream?fileId=%d'% (i)
+            readobj = urllib.request.urlopen(load_url, timeout=120)
+            loading_file = open(txt_file, 'a')
+            for line in readobj.readlines():
+                line = line.decode('utf-8')
+                line = line.replace('b', ' ')
+                loading_file.write('%s%s%s' % (i, '|', line)) 
+    except:urllib.error.HTTPError
+
+    loading_file.close()
+    readobj.close()
+
+
+#####write into json
+def initialize_data:
+    with open(txt_file,'r') as fh_txt, open(json_file, 'a') as fh_json:
+        file_data = fh_txt.readlines()[1:]
+        each_file_json = {}
+
+        for each_line in file_data:
+            each_line =  each_line.split('|')
+
+            if  each_line[31:32] != '0' and len(each_line)>1: 
+
+                ### initiate data into otc_data
+                d = otc_lookup(each_line[0:1], each_line[1:2][0:11])
+                if each_line[3:4]:  # combine new symbol and old symbol
+                    n = otc_data(each_line[1:2][0:11],each_line[3:4], each_line[7:8], each_line[31:32] )
+                else:
+                    n = otc_data(each_line[1:2][0:11],each_line[4:5], each_line[7:8], each_line[31:32] )
+
+                d.add_otc_data(n)
+
+                frozen = jsonpickle.encode(d,unpicklable=False)
+
+                json.dump(frozen,fh_json)
+
+
+    fh_txt.close()
+    fh_json.close()
+
+#print(d.id, d.date)
+
+#### search query
+suspect = []
+
+sample_symbol = ['PBOWP']
+sample_eff_date = ['12-JUL-18']
+#### Search Function
+### check if update is needed upon search
+""" sdate_point = 1
+    sdate_index = '2014-11-01'
+    edate_point = 1172
+    edate_index = '2018-06-01' """
+def date_count():
+    today_index = time.strftime("%Y-%m-%d")
+
+    def days_between(d1, d2):
+        d1 = datetime.strptime(d1, "%Y-%m-%d")
+        d2 = datetime.strptime(d2, "%Y-%m-%d")
+        return abs((d2 - d1).days)
+
+    d1 = edate_index
+    d2 = today_index
+
+    if  days_between(d1,d2) >0:
+        sdate_point = edate_point
+        edate_point = days_between(d1,d2) + edate_point
+
+
+#### reading from json file and search from there
+with open(txt_file, 'r') as fh_txt, open(json_file, 'r') as fh_json:
+    file_data = fh_txt.readlines()[1:]
+
+    datastore = jsonpickle.decode(fh_json.read())
+
+    for each_symbol_data in datastore:
+        for item in each_symbol_data['otc_db']:
+            if item['symbol'] == sample_symbol  and item['effective_date'] == sample_eff_date:
+                suspect.append(item)
+
+
+fh_txt.close()
+fh_json.close()
+
+print(suspect)
