@@ -1,0 +1,13 @@
+
+import csv
+with open('C:/Users/zcao/Desktop/AP1T_20181229.txt', mode = 'r') as reading_feed:
+    reader = csv.reader(reading_feed, dialect='excel', delimiter = ':')
+    #data = reading_feed.readlines()
+    i = 0
+    for row in reader:
+        if 'XCD' in row[0]:
+            i += 1
+            print(row[11],"----", 'vendor_event_id:',row[11][-15:-6])
+
+
+    print(i)
