@@ -1,5 +1,6 @@
 ### the main functions for this app is to extract and load the data from OTC; transform, filter and compel into a json file;
 ### and search on json file for given symbols and effective_date of the records.
+### link for complete web app: https://otclookup.factset.io/
 
 
 ####Libraries
